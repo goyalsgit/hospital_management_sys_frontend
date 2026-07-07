@@ -77,8 +77,8 @@ export default function LoginPage() {
       // Save user info too (useful for showing name in navbar etc)
       localStorage.setItem("user", JSON.stringify(data.user))
 
-      // Redirect to home page after login
-      router.push("/")
+      // Redirect to dashboard after login
+      router.push("/dashboard")
 
     } catch (err) {
       // This runs if fetch itself fails (network error, server down)
@@ -91,10 +91,10 @@ export default function LoginPage() {
   // ── RENDER ─────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4">
 
       {/* Card container */}
-      <div className="bg-white rounded-2xl shadow-md w-full max-w-md p-8">
+      <div className="bg-white rounded-3xl shadow-xl shadow-blue-100/50 w-full max-w-md p-8">
 
         {/* Header */}
         <div className="text-center mb-8">
