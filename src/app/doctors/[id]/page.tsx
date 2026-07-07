@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import Navbar from "@/components/Navbar"
 import Link from "next/link"
+import { trackDoctorView, trackBooking } from "@/lib/recommendations"
 
 interface Doctor {
   _id: string
@@ -41,6 +42,10 @@ export default function DoctorDetailPage({
         if (!res.ok) { setError("Doctor not found"); return }
         const data = await res.json()
         setDoctor(data.doctor)
+        // Track interest for recommendation
+        if (data.doctor?.specialization) {
+          trackDoctorView(data.doctor.specialization)
+        }
       } catch {
         setError("Failed to load doctor details")
       } finally {
@@ -77,6 +82,9 @@ export default function DoctorDetailPage({
     window.dispatchEvent(new Event("cartUpdated"))
     setAddedToCart(true)
     setError(null)
+
+    // Track booking interest for recommendation
+    trackBooking(doctor.specialization)
   }
 
   if (loading) {
