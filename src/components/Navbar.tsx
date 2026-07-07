@@ -1,11 +1,9 @@
 "use client"
-// "use client" required because we use useState, useEffect, localStorage
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-// TypeScript: shape of the user object we saved in localStorage
 interface User {
   id: string
   name: string
@@ -14,104 +12,121 @@ interface User {
 }
 
 export default function Navbar() {
-
-  // null = not logged in, User object = logged in
   const [user, setUser] = useState<User | null>(null)
-
+  const [cartCount, setCartCount] = useState(0)
   const router = useRouter()
 
-  // useEffect runs after component mounts (first render)
-  // We read localStorage here because localStorage is browser-only
-  // It doesn't exist on the server — Next.js renders on server first
   useEffect(() => {
     const stored = localStorage.getItem("user")
-
-    // If user data exists in localStorage, parse and set it
     if (stored) {
       try {
         setUser(JSON.parse(stored))
       } catch {
-        // If stored value is corrupted JSON, clear it
         localStorage.removeItem("user")
         localStorage.removeItem("token")
       }
     }
-  }, []) // [] = run once when component mounts
+
+    // Read cart count
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]")
+    setCartCount(cart.length)
+
+    // Listen for cart updates
+    const handleStorage = () => {
+      const c = JSON.parse(localStorage.getItem("cart") || "[]")
+      setCartCount(c.length)
+    }
+    window.addEventListener("storage", handleStorage)
+    window.addEventListener("cartUpdated", handleStorage)
+    return () => {
+      window.removeEventListener("storage", handleStorage)
+      window.removeEventListener("cartUpdated", handleStorage)
+    }
+  }, [])
 
   const handleLogout = () => {
-    // Clear everything from localStorage
     localStorage.removeItem("token")
     localStorage.removeItem("user")
-
-    // Reset state — this triggers re-render immediately
+    localStorage.removeItem("cart")
     setUser(null)
-
-    // Redirect to home
+    setCartCount(0)
     router.push("/")
   }
 
   return (
-    <nav className="bg-blue-600 px-6 py-4 flex items-center justify-between">
+    <nav className="bg-white border-b border-gray-100 px-6 py-3 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
+      <div className="max-w-6xl mx-auto flex items-center justify-between">
 
-      {/* Left: Brand */}
-      <Link href="/" className="text-white text-xl font-bold">
-        🏥 Hospital Booking
-      </Link>
-
-      {/* Right: Nav links */}
-      <div className="flex items-center gap-6">
-
-        <Link href="/" className="text-white hover:text-blue-200 transition-colors text-sm">
-          Home
-        </Link>
-        <Link href="/doctors" className="text-white hover:text-blue-200 transition-colors text-sm">
-          Doctors
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2">
+          <span className="text-2xl">🏥</span>
+          <span className="font-bold text-lg text-gray-800">MediBook</span>
         </Link>
 
-        {/* Conditional rendering based on auth state */}
-        {user ? (
-          // LOGGED IN — show user name and logout button
-          <div className="flex items-center gap-4">
-
-            {/* User info */}
-            <div className="flex items-center gap-2">
-              {/* Avatar circle with first letter of name */}
-              <div className="w-8 h-8 bg-white text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-              <div className="text-white text-sm">
-                <p className="font-medium">{user.name}</p>
-                <p className="text-blue-200 text-xs">{user.role}</p>
-              </div>
-            </div>
-
-            {/* Dashboard link based on role */}
-            <Link
-              href="/dashboard"
-              className="text-white hover:text-blue-200 transition-colors text-sm"
-            >
+        {/* Center links */}
+        <div className="hidden md:flex items-center gap-8">
+          <Link href="/" className="text-gray-600 hover:text-blue-600 text-sm font-medium transition-colors">
+            Home
+          </Link>
+          <Link href="/doctors" className="text-gray-600 hover:text-blue-600 text-sm font-medium transition-colors">
+            Doctors
+          </Link>
+          {user && (
+            <Link href="/dashboard" className="text-gray-600 hover:text-blue-600 text-sm font-medium transition-colors">
               Dashboard
             </Link>
+          )}
+        </div>
 
-            {/* Logout button */}
-            <button
-              onClick={handleLogout}
-              className="bg-white text-blue-600 px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-50 transition-colors"
-            >
-              Logout
-            </button>
+        {/* Right side */}
+        <div className="flex items-center gap-4">
 
-          </div>
-        ) : (
-          // NOT LOGGED IN — show login button
-          <Link
-            href="/login"
-            className="bg-white text-blue-600 px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-50 transition-colors"
-          >
-            Login
-          </Link>
-        )}
+          {/* Cart icon */}
+          {user && (
+            <Link href="/cart" className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+              </svg>
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+          )}
 
+          {user ? (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="hidden md:block">
+                  <p className="text-sm font-medium text-gray-800 leading-tight">{user.name}</p>
+                  <p className="text-xs text-gray-400">{user.role}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="text-sm text-gray-500 hover:text-red-500 font-medium transition-colors ml-2"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Link href="/login" className="text-sm text-gray-600 hover:text-blue-600 font-medium transition-colors">
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="text-sm bg-blue-600 text-white px-5 py-2 rounded-full font-medium hover:bg-blue-700 transition-colors"
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     </nav>
   )

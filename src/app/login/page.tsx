@@ -1,14 +1,11 @@
 "use client"
-// "use client" required — we use useState, useEffect, event handlers
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
 export default function LoginPage() {
 
-  // ── STATE ──────────────────────────────────────────
-  // formData holds both email and password in one object
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -17,8 +14,15 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState<string | null>(null)
 
-  // useRouter — used to redirect after login
   const router = useRouter()
+
+  // If already logged in → redirect to dashboard
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    if (token) {
+      router.push("/dashboard")
+    }
+  }, [router])
 
   // ── HANDLERS ───────────────────────────────────────
 

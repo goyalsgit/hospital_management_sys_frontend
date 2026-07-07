@@ -1,10 +1,5 @@
-// DoctorCard component
-// Receives doctor data as props and displays a card
-
 import Link from "next/link"
 
-// TypeScript interface — defines what props this component accepts
-// Think of it like a contract: "whoever uses this component MUST pass these"
 interface DoctorCardProps {
   id: string
   name: string
@@ -13,7 +8,6 @@ interface DoctorCardProps {
   fees: number
 }
 
-// Destructure props directly in the function parameter
 export default function DoctorCard({
   id,
   name,
@@ -22,38 +16,34 @@ export default function DoctorCard({
   fees,
 }: DoctorCardProps) {
   return (
-    // Card container
-    <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-lg hover:shadow-blue-100/50 transition-all group">
 
-      {/* Doctor avatar placeholder */}
-      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-        <span className="text-2xl">👨‍⚕️</span>
+      {/* Avatar */}
+      <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mb-4 text-white font-bold text-xl group-hover:scale-105 transition-transform">
+        {name.charAt(0)}
       </div>
 
-      {/* Doctor name */}
-      <h3 className="text-lg font-bold text-gray-800 mb-1">
-        {name}
-      </h3>
+      {/* Name */}
+      <h3 className="text-lg font-bold text-gray-800 mb-1">{name}</h3>
 
-      {/* Specialization badge */}
-      <span className="inline-block bg-blue-50 text-blue-600 text-sm px-3 py-1 rounded-full mb-3">
+      {/* Specialization */}
+      <span className="inline-block bg-blue-50 text-blue-600 text-xs px-3 py-1 rounded-full font-medium mb-4">
         {specialization}
       </span>
 
-      {/* Details row */}
-      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-        <span>⏱ {experience} years exp</span>
-        <span className="font-semibold text-green-600">₹{fees}</span>
+      {/* Stats */}
+      <div className="flex items-center justify-between text-sm mb-5 pb-4 border-b border-gray-100">
+        <span className="text-gray-500">⏱ {experience} yrs</span>
+        <span className="font-bold text-green-600">₹{fees}</span>
       </div>
 
-      {/* Book button — links to doctor detail page */}
+      {/* Button */}
       <Link
         href={`/doctors/${id}`}
-        className="block w-full text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        className="block w-full text-center bg-blue-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
       >
-        Book Appointment
+        Book Now →
       </Link>
-
     </div>
   )
 }
