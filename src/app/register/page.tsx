@@ -42,7 +42,7 @@ export default function RegisterPage() {
       setError(null)
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`,
+        `https://hospital-management-sys-at4k.onrender.com/api/auth/register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

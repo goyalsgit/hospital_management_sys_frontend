@@ -47,7 +47,7 @@ export default function LoginPage() {
 
       // Call our backend API
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+        `https://hospital-management-sys-at4k.onrender.com/api/auth/login`,
         {
           method: "POST",
           headers: {

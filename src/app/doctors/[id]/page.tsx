@@ -56,7 +56,7 @@ export default function DoctorDetailPage({
     const fetchDoctor = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/doctors/${id}`
+          `https://hospital-management-sys-at4k.onrender.com/api/doctors/${id}`
         )
 
         if (!res.ok) {
@@ -108,7 +108,7 @@ export default function DoctorDetailPage({
       setBookingError(null)
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/appointments`,
+        `https://hospital-management-sys-at4k.onrender.com/api/appointments`,
         {
           method: "POST",
           headers: {

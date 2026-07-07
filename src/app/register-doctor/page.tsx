@@ -48,7 +48,7 @@ export default function DoctorRegisterPage() {
       setError(null)
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/register-doctor`,
+        `https://hospital-management-sys-at4k.onrender.com/api/auth/register-doctor`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

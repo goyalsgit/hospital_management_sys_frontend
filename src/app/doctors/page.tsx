@@ -36,9 +36,8 @@ export default function DoctorsPage() {
         setLoading(true)
 
         // Call our backend API
-        // process.env.NEXT_PUBLIC_API_URL = "http://localhost:5000"
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/doctors`
+          `https://hospital-management-sys-at4k.onrender.com/api/doctors`
         )
 
         // If response is not ok (4xx or 5xx), throw an error

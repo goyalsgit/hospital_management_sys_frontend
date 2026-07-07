@@ -37,7 +37,7 @@ export default function DashboardPage() {
     const fetchAppointments = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/appointments`,
+          `https://hospital-management-sys-at4k.onrender.com/api/appointments`,
           {
             headers: {
               // Send token in Authorization header
