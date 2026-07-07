@@ -76,6 +76,11 @@ export default function Navbar() {
               Dashboard
             </Link>
           )}
+          {user && (
+            <Link href="/rewards" className="text-gray-600 hover:text-amber-500 text-sm font-medium transition-colors flex items-center gap-1">
+              🪙 Rewards
+            </Link>
+          )}
         </div>
 
         {/* Right side */}

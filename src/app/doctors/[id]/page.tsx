@@ -248,7 +248,183 @@ export default function DoctorDetailPage({
             </div>
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <ReviewSection doctorId={id} />
+
       </div>
+    </div>
+  )
+}
+
+// ══════════════════════════════════════
+//     REVIEW SECTION COMPONENT
+// ══════════════════════════════════════
+
+interface ReviewData {
+  _id: string
+  userId: { name: string }
+  rating: number
+  comment: string
+  createdAt: string
+}
+
+function ReviewSection({ doctorId }: { doctorId: string }) {
+  const [reviews, setReviews] = useState<ReviewData[]>([])
+  const [avgRating, setAvgRating] = useState(0)
+  const [showForm, setShowForm] = useState(false)
+  const [rating, setRating]     = useState(5)
+  const [comment, setComment]   = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const [message, setMessage]   = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchReviews()
+  }, [doctorId])
+
+  const fetchReviews = async () => {
+    try {
+      const res = await fetch(
+        `https://hospital-management-sys-at4k.onrender.com/api/reviews/doctor/${doctorId}`
+      )
+      if (res.ok) {
+        const data = await res.json()
+        setReviews(data.reviews)
+        setAvgRating(data.averageRating)
+      }
+    } catch { /* */ }
+  }
+
+  const handleSubmitReview = async () => {
+    const token = localStorage.getItem("token")
+    if (!token) { setMessage("Please login first"); return }
+
+    setSubmitting(true)
+    setMessage(null)
+
+    try {
+      const res = await fetch(
+        "https://hospital-management-sys-at4k.onrender.com/api/reviews",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({ doctorId, rating, comment }),
+        }
+      )
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setMessage(`✅ ${data.message}`)
+        setShowForm(false)
+        setComment("")
+        fetchReviews()
+      } else {
+        setMessage(`❌ ${data.message}`)
+      }
+    } catch {
+      setMessage("❌ Could not submit review")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="mt-10 bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800">Reviews</h2>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="flex text-yellow-400">
+              {"★".repeat(Math.round(avgRating))}{"☆".repeat(5 - Math.round(avgRating))}
+            </div>
+            <span className="text-sm text-gray-500">{avgRating} ({reviews.length} reviews)</span>
+          </div>
+        </div>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+        >
+          Write Review (+10🪙)
+        </button>
+      </div>
+
+      {message && (
+        <div className={`p-3 rounded-xl mb-4 text-sm ${message.startsWith("✅") ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"}`}>
+          {message}
+        </div>
+      )}
+
+      {/* Review Form */}
+      {showForm && (
+        <div className="bg-gray-50 rounded-xl p-5 mb-6">
+          <div className="mb-4">
+            <label className="text-sm font-medium text-gray-700 block mb-2">Rating</label>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  className={`text-3xl transition-transform hover:scale-110 ${star <= rating ? "text-yellow-400" : "text-gray-300"}`}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="mb-4">
+            <label className="text-sm font-medium text-gray-700 block mb-1">Comment</label>
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Share your experience..."
+              rows={3}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 resize-none"
+            />
+          </div>
+          <button
+            onClick={handleSubmitReview}
+            disabled={submitting}
+            className="bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 disabled:opacity-50"
+          >
+            {submitting ? "Submitting..." : "Submit Review & Earn Coins"}
+          </button>
+        </div>
+      )}
+
+      {/* Reviews List */}
+      {reviews.length === 0 ? (
+        <p className="text-gray-400 text-center py-8">No reviews yet. Be the first!</p>
+      ) : (
+        <div className="space-y-4">
+          {reviews.map((review) => (
+            <div key={review._id} className="border-b border-gray-100 pb-4 last:border-0">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-xs font-bold text-blue-600">
+                    {review.userId?.name?.charAt(0)?.toUpperCase() || "?"}
+                  </div>
+                  <span className="font-medium text-gray-800 text-sm">{review.userId?.name}</span>
+                </div>
+                <span className="text-xs text-gray-400">
+                  {new Date(review.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+              <div className="flex text-yellow-400 text-sm ml-10 mb-1">
+                {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
+              </div>
+              {review.comment && (
+                <p className="text-gray-500 text-sm ml-10">{review.comment}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
